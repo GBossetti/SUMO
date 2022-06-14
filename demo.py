@@ -24,30 +24,64 @@ def get_options():
     return options
 
 
-# contains TraCI control loop
-def run():
-    #Time Step
-    step = 0 #Keeping track of our time step, instead of query via track i (is simple tacking control from here)
 
-    # Main control loop with exit condition                       
-        # traci -> Traffic Control Interface
-    while traci.simulation.getMinExpectedNumber() > 0: # -> return 0 when all reoute files have been ehausted and there's no more vehicles left in the simulation
-        traci.simulationStep() # by default advance the simulation in one time step
+#def generate_routefile():
+#    with open("demo2.rou.xml", "w") as routes:
+#        print("""<routes>
+#        <vType id="car" vClass="passenger" length="2" accel="3.5" decel="2.2" sigma="1.0" maxSpeed="10" color="1,0,0"/>
+#        <vType id="car1" 
+#        vClass="passenger" length="2" accel="3.5" decel="2.2" 
+#        sigma="1.0" maxSpeed="10" color="0,255,255"/>
+#            
+#        <vType id="car2" 
+#        vClass="passenger" length="2" accel="3.5" decel="2.2" 
+#        sigma="1.0" maxSpeed="10" color="1,0,0"/>
+#
+#            <vType id="car3" 
+#        vClass="passenger" length="2" accel="3.5" decel="2.2" 
+#        sigma="1.0" maxSpeed="10" color="0,255,0"/>
+#
+#        <route id="route_0" edges="E0 E1 E2 E3 E4 -E0" />
+#
+#        <vehicle id="0" type="car" route="route_0" depart="0"/>
+#        <vehicle id="1" type="car3" route="route_0" depart="3"/>
+#        <vehicle id="2" type="car1" route="route_0" depart="6"/>
+#        <vehicle id="3" type="car2" route="route_0" depart="9"/>
+#        <vehicle id="4" type="car3" route="route_0" depart="12"/>        
+#        </routes>""", file=routes)
+
+
+#def generate_routefile():
+#    N = 20
+#    with open("demo2.rou.xml", "w") as routes:
+#        print("""<routes>
+#        
+#        <vType id="car" vClass="passenger" length="2" accel="3.5" decel="2.2" sigma="1.0" maxSpeed="10" color="1,0,0"/>
+#        
+#        <route id="route_0" edges="E0 E1 E2 E3 E4 -E0" />
+#        <vehicle id="0" type="car" route="route_0" depart="0"/>""", file=routes)
+#
+#        for i in range(N):
+#            print('    <vehicle id="car_%i" type="car" route="route_0" depart="%i" />' file=routes)
+#        print("</routes>", file=routes)
+
+    
+
+def run():
+    step = 0 
+
+    while step < 200:
+        traci.simulationStep() 
         print(step)
 
-        #det_vehs = traci.inductionloop.getLastStepVehicleIDs("det_0")
-        #for veh in det_vehs:
-        #    print(veh)
-        #    traci.vehicle.changeLane(veh, 2, 25)
-
-        if step == 350:
+        if step == 100:
             traci.vehicle.changeTarget("0", "-E0")
-            traci.vehicle.changeTarget("2", "-E0")
-            traci.vehicle.changeTarget("carflow", "-E0")
         step += 1
 
     traci.close()
     sys.stdout.flush()
+
+
 
 
 # main entry point
@@ -59,8 +93,12 @@ if __name__ == "__main__":
         sumoBinary = checkBinary('sumo')
     else:
         sumoBinary = checkBinary('sumo-gui')
+    
+    # first, generate the route file for this simulation
+    generate_routefile()
 
     # traci starts sumo as a subprocess and then this script connects and runs
     traci.start([sumoBinary, "-c", "demo.sumocfg",
                              "--tripinfo-output", "tripinfo.xml"])
+    print("Starting SUMO - UTN project")
     run()
